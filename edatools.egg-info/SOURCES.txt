@@ -1,0 +1,10 @@
+LICENSE.txt
+README.rst
+setup.py
+edatools/__init__.py
+edatools/main.py
+edatools.egg-info/PKG-INFO
+edatools.egg-info/SOURCES.txt
+edatools.egg-info/dependency_links.txt
+edatools.egg-info/requires.txt
+edatools.egg-info/top_level.txt

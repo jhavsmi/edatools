@@ -1,0 +1,12 @@
+Metadata-Version: 2.1
+Name: edatools
+Version: 0.1
+Summary: A set of functions for data cleaning and exploratory data analysis
+Author: Joel Smith
+Author-email: jhavsmi@pm.me
+License-File: LICENSE.txt
+Requires-Dist: pandas
+Requires-Dist: datetime
+Requires-Dist: setuptools
+Requires-Dist: wheel
+Requires-Dist: twine
