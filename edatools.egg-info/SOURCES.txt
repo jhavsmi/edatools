@@ -1,5 +1,5 @@
 LICENSE.txt
-README.rst
+README.md
 setup.py
 edatools/__init__.py
 edatools/main.py
