@@ -7,6 +7,6 @@ setup(name='edatools',
       author_email='jhavsmi@pm.me',
       packages=['edatools'],
       install_requires=[
-            'pandas', 'datetime'
+            'polars', 'datetime'
       ]
 )
