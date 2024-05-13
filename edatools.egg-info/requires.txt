@@ -1,5 +1,0 @@
-pandas
-datetime
-setuptools
-wheel
-twine

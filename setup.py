@@ -7,6 +7,6 @@ setup(name='edatools',
       author_email='jhavsmi@pm.me',
       packages=find_packages(),
       install_requires=[
-            'pandas', 'datetime','setuptools','wheel','twine'
+            'pandas', 'datetime'
       ]
 )
