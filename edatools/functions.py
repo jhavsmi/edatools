@@ -4,7 +4,7 @@ import polars as pl
 def dtvars(df_input, dtcols, dtlabels):
     """Creates multiple time-related columns out of a datetime column using polars"""
     for i in range(len(dtcols)):
-        df_output = df_input.with_columns(
+        df_input = df_input.with_columns(
         pl.col(dtcols[i]).dt.year().alias(dtlabels[i]+'_year'),
         pl.col(dtcols[i]).dt.month().alias(dtlabels[i]+'_month'),
         pl.col(dtcols[i]).dt.day().alias(dtlabels[i]+'_day'),
@@ -13,11 +13,11 @@ def dtvars(df_input, dtcols, dtlabels):
         pl.col(dtcols[i]).dt.hour().alias(dtlabels[i]+'_hour'),
         pl.col(dtcols[i]).dt.time().alias(dtlabels[i]+'_time')
     )
-    return df_output
+    return df_input
 
 def cleaning_record(df, step_label, starting_rows='NA', clean_df='NA'):
     """Records the number of removed and remaining rows for a given data cleaning step"""
-    if clean_df == 'NA':
+    if not isinstance(clean_df, pl.DataFrame):
         row_count = starting_rows-df.shape[0]
         clean_df = pl.DataFrame(data={'Cleaning Step': step_label,'Rows Removed':row_count,'Rows Remaining':df.shape[0]})
     else:
@@ -35,3 +35,11 @@ def weekday_names(df_input, wdcols):
         )
         df_output = df_output.with_columns(pl.col(wdcols[i]).cast(dtype=dtype))
     return df_output
+
+def missing_data(df_input):
+    df_missing = pl.DataFrame({'columns':df_input.columns,
+                               'dtypes':df_input.dtypes,
+                               'null_values':df_input.null_count().row(0)})
+    return df_missing
+
+
