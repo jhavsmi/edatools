@@ -73,34 +73,3 @@ def missing_data(df_input):
                                'null_values':df_input.null_count().row(0)})
     return df_missing
 
-def outlier_imputer(column_list, iqr_factor):
-    '''
-    Impute upper-limit values in specified columns based on their interquartile range.
-
-    Arguments:
-        column_list: A list of columns to iterate over
-        iqr_factor: A number representing x in the formula:
-                    Q3 + (x * IQR). Used to determine maximum threshold,
-                    beyond which a point is considered an outlier.
-
-    The IQR is computed for each column in column_list and values exceeding
-    the upper threshold for each column are imputed with the upper threshold value.
-    '''
-    for col in column_list:
-        # Reassign minimum to zero
-        df.loc[df[col] < 0, col] = 0
-
-        # Calculate upper threshold
-        q1 = df[col].quantile(0.25)
-        q3 = df[col].quantile(0.75)
-        iqr = q3 - q1
-        upper_threshold = q3 + (iqr_factor * iqr)
-        print(col)
-        print('q3:', q3)
-        print('upper_threshold:', upper_threshold)
-
-        # Reassign values > threshold to threshold
-        df.loc[df[col] > upper_threshold, col] = upper_threshold
-        print(df[col].describe())
-        print()
-
