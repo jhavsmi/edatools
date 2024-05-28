@@ -1,7 +1,7 @@
 import datetime as dt
 import polars as pl
 
-def dtvars(df_input, dtcols, dtlabels):
+def pl_dtvars(df_input, dtcols, dtlabels):
     '''
     Creates multiple time-related columns out of a datetime column using polars
     
@@ -23,7 +23,52 @@ def dtvars(df_input, dtcols, dtlabels):
     )
     return df_input
 
-def cleaning_record(df, step_label, starting_rows='NA', clean_df='NA'):
+def pl_outlier_imputer(df, column_list, iqr_factor):
+    '''
+    Impute upper-limit values in specified columns based on their interquartile range.
+
+    Arguments:
+        column_list: A list of columns to iterate over
+        iqr_factor: A number representing x in the formula:
+                    Q3 + (x * IQR). Used to determine maximum threshold,
+                    beyond which a point is considered an outlier.
+
+    The IQR is computed for each column in column_list and values exceeding
+    the upper threshold for each column are imputed with the upper threshold value.
+    '''
+
+    for col in column_list:
+        # Reassign minimum to zero
+        df = df.with_columns(pl.when(pl.col(col) < 0 )
+               .then(0)
+               .otherwise(pl.col(col)).alias(col))
+
+        # Calculate upper threshold
+        q1 = df.select(pl.col(col).quantile(0.25)).item()
+        q3 = df.select(pl.col(col).quantile(0.75)).item()
+        iqr = q3 - q1
+        upper_threshold = q3 + (iqr_factor * iqr)
+        print(col)
+        print('q3:', q3)
+        print('upper_threshold:', upper_threshold ,'\n')
+
+        # Reassign values > threshold to threshold
+        df = df.with_columns(pl.when(pl.col(col) > upper_threshold)
+               .then(upper_threshold)
+               .otherwise(pl.col(col)).alias(col))
+        if 'desc_df' in locals():
+            desc_df = desc_df.join(df[col].describe(),on='statistic')
+        else: 
+            desc_df = df[col].describe()
+    
+    desc_df.columns = ['statistic'] + column_list
+    
+    print(desc_df)
+    return df      
+
+        
+
+def pl_cleaning_record(df, step_label, starting_rows='NA', clean_df='NA'):
     '''
     Records the number of removed and remaining rows for a given data cleaning step
     
@@ -43,7 +88,7 @@ def cleaning_record(df, step_label, starting_rows='NA', clean_df='NA'):
         clean_df = pl.concat([clean_df,new_row])
     return clean_df
 
-def weekday_names(df_input, wdcols):
+def pl_weekday_names(df_input, wdcols):
     '''
     Converts numerical weekdays into abbreviated weekday names
     
@@ -60,7 +105,7 @@ def weekday_names(df_input, wdcols):
         df_output = df_output.with_columns(pl.col(wdcols[i]).cast(dtype=dtype))
     return df_output
 
-def missing_data(df_input):
+def pl_dtypes(df_input):
     '''
     Computes missing values and data type for each column in a polars dataframe.
 

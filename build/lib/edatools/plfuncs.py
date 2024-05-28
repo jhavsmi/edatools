@@ -1,7 +1,7 @@
 import datetime as dt
 import polars as pl
 
-def dtvars(df_input, dtcols, dtlabels):
+def pl_dtvars(df_input, dtcols, dtlabels):
     '''
     Creates multiple time-related columns out of a datetime column using polars
     
@@ -23,7 +23,7 @@ def dtvars(df_input, dtcols, dtlabels):
     )
     return df_input
 
-def outlier_imputer(df, column_list, iqr_factor):
+def pl_outlier_imputer(df, column_list, iqr_factor):
     '''
     Impute upper-limit values in specified columns based on their interquartile range.
 
@@ -36,6 +36,7 @@ def outlier_imputer(df, column_list, iqr_factor):
     The IQR is computed for each column in column_list and values exceeding
     the upper threshold for each column are imputed with the upper threshold value.
     '''
+
     for col in column_list:
         # Reassign minimum to zero
         df = df.with_columns(pl.when(pl.col(col) < 0 )
@@ -49,19 +50,25 @@ def outlier_imputer(df, column_list, iqr_factor):
         upper_threshold = q3 + (iqr_factor * iqr)
         print(col)
         print('q3:', q3)
-        print('upper_threshold:', upper_threshold)
+        print('upper_threshold:', upper_threshold ,'\n')
 
         # Reassign values > threshold to threshold
         df = df.with_columns(pl.when(pl.col(col) > upper_threshold)
                .then(upper_threshold)
                .otherwise(pl.col(col)).alias(col))
-        
-        print(df[col].describe())
+        if 'desc_df' in locals():
+            desc_df = desc_df.join(df[col].describe(),on='statistic')
+        else: 
+            desc_df = df[col].describe()
+    
+    desc_df.columns = ['statistic'] + column_list
+    
+    print(desc_df)
+    return df      
 
-        return df      
         
 
-def cleaning_record(df, step_label, starting_rows='NA', clean_df='NA'):
+def pl_cleaning_record(df, step_label, starting_rows='NA', clean_df='NA'):
     '''
     Records the number of removed and remaining rows for a given data cleaning step
     
@@ -81,7 +88,7 @@ def cleaning_record(df, step_label, starting_rows='NA', clean_df='NA'):
         clean_df = pl.concat([clean_df,new_row])
     return clean_df
 
-def weekday_names(df_input, wdcols):
+def pl_weekday_names(df_input, wdcols):
     '''
     Converts numerical weekdays into abbreviated weekday names
     
@@ -98,7 +105,7 @@ def weekday_names(df_input, wdcols):
         df_output = df_output.with_columns(pl.col(wdcols[i]).cast(dtype=dtype))
     return df_output
 
-def missing_data(df_input):
+def pl_dtypes(df_input):
     '''
     Computes missing values and data type for each column in a polars dataframe.
 
